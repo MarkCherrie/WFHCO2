@@ -19,7 +19,7 @@ export default function DataStory() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch('src/assets/table1.csv');
+        const response = await fetch('./table1.csv');
         const csvString = await response.text();
 
         Papa.parse(csvString, {
@@ -68,7 +68,7 @@ export default function DataStory() {
   useEffect(() => {
     const loadCO2Data = async () => {
       try {
-        const response = await fetch('src/assets/table2.csv');
+        const response = await fetch('./table2.csv');
         const csvString = await response.text();
 
         Papa.parse(csvString, {
