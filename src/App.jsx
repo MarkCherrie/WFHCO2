@@ -12,6 +12,7 @@ export default function DataStory() {
   const main = useRef();
   const svgRef = useRef();
   const barChartRef = useRef();
+  const populationRef = useRef();
   const [data, setData] = useState([]);
   const [barData, setBarData] = useState([]);
 
@@ -19,7 +20,7 @@ export default function DataStory() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await fetch('./table1.csv');
+        const response = await fetch('table1.csv');
         const csvString = await response.text();
 
         Papa.parse(csvString, {
@@ -68,7 +69,7 @@ export default function DataStory() {
   useEffect(() => {
     const loadCO2Data = async () => {
       try {
-        const response = await fetch('./table2.csv');
+        const response = await fetch('table2.csv');
         const csvString = await response.text();
 
         Papa.parse(csvString, {
@@ -256,6 +257,34 @@ useGSAP(() => {
     ScrollTrigger.refresh();
   }, { scope: main, dependencies: [barData] });
 
+  // --- 7. POPULATION IMPACT ANIMATION ---
+  useGSAP(() => {
+    if (!populationRef.current) return;
+    const rows = populationRef.current.querySelectorAll('.calc-row');
+    if (!rows.length) return;
+
+    const tl3 = gsap.timeline({
+      scrollTrigger: {
+        trigger: ".population-container",
+        start: "top top",
+        end: "+=2500",
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+      }
+    });
+
+    rows.forEach((row, i) => {
+      tl3.fromTo(row,
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 1.5 },
+        i * 1.2
+      );
+    });
+
+    ScrollTrigger.refresh();
+  }, { scope: main, dependencies: [data] });
+
   if (data.length === 0) return <div style={styles.loading}>Loading Data...</div>;
 
   return (
@@ -384,7 +413,7 @@ useGSAP(() => {
               
               {/* Grid lines and labels */}
               {[0, 1, 2, 3, 4, 5, 6].map((val) => {
-                const y = 650 - (val / 6) * 475;
+                const y = 650 - (val / 5) * 475;
                 return (
                   <g key={val}>
                     <line x1={95} y1={y} x2={100} y2={y} stroke="#444" strokeWidth="1" />
@@ -403,7 +432,7 @@ useGSAP(() => {
                 const commuteEmissions = item.categories['Commute'] || 0;
                 const totalEmissions = workplaceEmissions + commuteEmissions;
                 
-                const scale = (val) => (val / 6) * 475;
+                const scale = (val) => (val / 5) * 475;
                 const workplaceHeight = scale(workplaceEmissions);
                 const commuteHeight = scale(commuteEmissions);
                 
@@ -577,9 +606,59 @@ useGSAP(() => {
         </div>
       </section>
 
+      {/* Population Impact Section */}
+      <section className="population-container" style={{ ...styles.section, background: '#111', minHeight: '120vh' }}>
+        <div ref={populationRef} className="content" style={{ ...styles.card, paddingTop: '80px', paddingBottom: '300px' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
+
+            <h1 className="calc-row" style={{ color: 'white', marginBottom: '60px', fontSize: '2.5rem', opacity: 0 }}>
+              The bigger picture
+            </h1>
+
+            <div className="calc-row" style={{ opacity: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', border: '1px solid #333', borderRadius: '12px', padding: '20px 28px', backgroundColor: '#1c1c1c' }}>
+              <span style={{ color: '#aaa', fontSize: '1.3rem' }}>Scotland's working population</span>
+              <span style={{ color: 'white', fontSize: '2.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>2,700,000</span>
+            </div>
+
+            <div className="calc-row" style={{ opacity: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '24px', border: '1px solid #333', borderRadius: '12px', padding: '20px 28px', backgroundColor: '#1c1c1c' }}>
+              <span style={{ color: '#aaa', fontSize: '1.3rem' }}>× shift to WFH between 2011 and 2022</span>
+              <span style={{ color: '#ef4444', fontSize: '2.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>20.8%</span>
+            </div>
+
+            <div className="calc-row" style={{ opacity: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', border: '1px solid #333', borderRadius: '12px', padding: '20px 28px', backgroundColor: '#1c1c1c' }}>
+              <span style={{ color: '#aaa', fontSize: '1.3rem' }}>= additional people working from home</span>
+              <span style={{ color: 'white', fontSize: '2.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>≈ 561,600</span>
+            </div>
+
+            <div className="calc-row" style={{ opacity: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', border: '1px solid #333', borderRadius: '12px', padding: '20px 28px', backgroundColor: '#1c1c1c' }}>
+              <span style={{ color: '#aaa', fontSize: '1.3rem' }}>× daily CO₂ saved per person (vs driving to office)</span>
+              <span style={{ color: '#f59e0b', fontSize: '2.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>1.70 kg</span>
+            </div>
+
+            <div className="calc-row" style={{ opacity: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', border: '1px solid #333', borderRadius: '12px', padding: '20px 28px', backgroundColor: '#1c1c1c' }}>
+              <span style={{ color: '#aaa', fontSize: '1.3rem' }}>× working days per year</span>
+              <span style={{ color: 'white', fontSize: '2.5rem', fontWeight: 'bold', fontFamily: 'monospace' }}>235</span>
+            </div>
+
+            <div className="calc-row" style={{ opacity: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '16px', border: '1px solid #333', borderRadius: '12px', padding: '20px 28px', backgroundColor: '#1c1c1c' }}>
+              <span style={{ color: 'white', fontSize: '1.8rem', fontWeight: 'bold' }}>= annual CO₂ saving</span>
+              <span style={{ color: '#22d3ee', fontSize: '3.5rem', fontWeight: '900', fontFamily: 'monospace' }}>~224,000 tonnes</span>
+            </div>
+
+            <div className="calc-row" style={{ opacity: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', border: '1px solid #333', borderRadius: '12px', padding: '20px 28px', backgroundColor: '#1c1c1c' }}>
+              <span style={{ color: '#555', fontSize: '1rem', fontStyle: 'italic' }}>
+                ≈ equivalent to removing ~124,000 cars from Scottish roads for a year
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* Spacing Section for Scroll Room */}
       <section style={{ ...styles.section, height: '100vh' }}>
          <h2 style={styles.title}>The End</h2>
+            
       </section>
     </div>
   );
